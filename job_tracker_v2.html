@@ -1,0 +1,297 @@
+
+<h2 class="sr-only">简历投递与面试进度追踪表，支持新增、编辑和状态管理</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:1.25rem 0}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.stat{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;display:flex;flex-direction:column;gap:6px}
+.stat-top{display:flex;align-items:center;justify-content:space-between}
+.stat-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.stat-icon.blue{background:#E6F1FB;color:#185FA5}
+.stat-icon.amber{background:#FAEEDA;color:#854F0B}
+.stat-icon.teal{background:#E1F5EE;color:#0F6E56}
+.stat-icon.green{background:#EAF3DE;color:#3B6D11}
+.stat-num{font-size:26px;font-weight:500;color:var(--color-text-primary);line-height:1}
+.stat-label{font-size:12px;color:var(--color-text-secondary)}
+
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:.875rem;gap:8px;flex-wrap:wrap}
+.filter-wrap{display:flex;align-items:center;gap:6px}
+.filter-label{font-size:12px;color:var(--color-text-secondary)}
+select.filter-sel{font-size:12px;padding:6px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer}
+button.add-btn{display:flex;align-items:center;gap:6px;font-size:13px;padding:7px 14px;border-radius:var(--border-radius-md);border:0.5px solid #185FA5;background:#185FA5;color:#fff;cursor:pointer;font-weight:500;transition:opacity .15s}
+button.add-btn:hover{opacity:.88}
+
+.tbl-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+thead{background:var(--color-background-secondary)}
+thead th{color:var(--color-text-secondary);font-weight:500;font-size:11.5px;padding:10px 14px;text-align:left;border-bottom:0.5px solid var(--color-border-tertiary);letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+tbody tr{border-bottom:0.5px solid var(--color-border-tertiary);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--color-background-secondary)}
+td{padding:11px 14px;vertical-align:middle;color:var(--color-text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.muted{color:var(--color-text-secondary);font-size:12.5px}
+td.company-cell{font-weight:500}
+td.notes-cell{white-space:normal;word-break:break-all;font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;padding:3px 9px;border-radius:100px;font-weight:500;white-space:nowrap}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.6;flex-shrink:0}
+.b-投递中{background:#E6F1FB;color:#185FA5}
+.b-笔试{background:#EEEDFE;color:#3C3489}
+.b-技术面{background:#FAEEDA;color:#633806}
+.b-HR面{background:#EAF3DE;color:#27500A}
+.b-已拿offer{background:#E1F5EE;color:#085041}
+.b-已挂{background:#FCEBEB;color:#791F1F}
+.b-已放弃{background:#F1EFE8;color:#444441}
+
+.type-tag{font-size:11px;color:var(--color-text-secondary);background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);padding:2px 7px;border-radius:100px}
+
+.next-cell{font-size:12px}
+.next-date{color:var(--color-text-primary);font-weight:500}
+.next-lbl{color:var(--color-text-secondary);font-size:11.5px;margin-top:1px}
+
+.act-btn{background:none;border:none;cursor:pointer;color:var(--color-text-secondary);padding:5px;border-radius:6px;font-size:15px;line-height:1;display:inline-flex;align-items:center}
+.act-btn:hover{color:var(--color-text-primary);background:var(--color-background-secondary)}
+.act-btn.del:hover{color:#A32D2D;background:#FCEBEB}
+
+.empty{text-align:center;padding:3rem;color:var(--color-text-secondary);font-size:13px}
+.empty i{font-size:32px;display:block;margin-bottom:.75rem;opacity:.35}
+
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.5rem;width:min(500px,94vw);max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.modal-header h3{font-size:15px;font-weight:500}
+.close-btn{background:none;border:none;cursor:pointer;color:var(--color-text-secondary);font-size:18px;padding:4px;border-radius:6px;display:flex;align-items:center}
+.close-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.form-row{margin-bottom:.875rem}
+.form-row label{display:block;font-size:11.5px;color:var(--color-text-secondary);margin-bottom:4px;font-weight:500;letter-spacing:.02em}
+.form-row input,.form-row select,.form-row textarea{width:100%;font-size:13px}
+.form-row textarea{resize:vertical;min-height:64px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.divider{border:none;border-top:0.5px solid var(--color-border-tertiary);margin:.875rem 0}
+.btn-row{display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem}
+.btn-cancel{font-size:13px;padding:7px 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);cursor:pointer}
+.btn-cancel:hover{background:var(--color-background-secondary)}
+.btn-save{font-size:13px;padding:7px 16px;border-radius:var(--border-radius-md);border:0.5px solid #185FA5;background:#185FA5;color:#fff;cursor:pointer;font-weight:500}
+.btn-save:hover{opacity:.88}
+
+th:nth-child(1){width:15%}th:nth-child(2){width:14%}th:nth-child(3){width:9%}
+th:nth-child(4){width:10%}th:nth-child(5){width:13%}th:nth-child(6){width:11%}
+th:nth-child(7){width:20%}th:nth-child(8){width:8%}
+</style>
+
+<div class="wrap">
+  <div class="stat-row" id="stats"></div>
+
+  <div class="toolbar">
+    <div class="filter-wrap">
+      <span class="filter-label">筛选</span>
+      <select class="filter-sel" id="filterStatus" onchange="render()">
+        <option value="">全部状态</option>
+        <option>投递中</option><option>笔试</option><option>技术面</option>
+        <option>HR面</option><option>已拿offer</option><option>已挂</option><option>已放弃</option>
+      </select>
+    </div>
+    <button class="add-btn" onclick="openAdd()">
+      <i class="ti ti-plus" aria-hidden="true"></i> 新增投递
+    </button>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>公司</th><th>岗位</th><th>类型</th><th>投递日期</th>
+          <th>下次节点</th><th>状态</th><th>备注</th>
+          <th style="text-align:center">操作</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none">
+      <i class="ti ti-clipboard-list" aria-hidden="true"></i>
+      暂无记录，点击「新增投递」开始记录
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">新增投递</h3>
+      <button class="close-btn" onclick="closeModal()" aria-label="关闭"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-row">
+        <label>公司名称 *</label>
+        <input id="f-company" placeholder="如：乐鑫科技">
+      </div>
+      <div class="form-row">
+        <label>岗位 *</label>
+        <input id="f-role" placeholder="如：PCB设计工程师">
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>类型</label>
+        <select id="f-type">
+          <option>实习</option><option>校招</option><option>提前批</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>状态</label>
+        <select id="f-status">
+          <option>投递中</option><option>笔试</option><option>技术面</option>
+          <option>HR面</option><option>已拿offer</option><option>已挂</option><option>已放弃</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <div class="form-grid">
+      <div class="form-row">
+        <label>投递日期</label>
+        <input type="date" id="f-date">
+      </div>
+      <div class="form-row">
+        <label>下次节点日期</label>
+        <input type="date" id="f-next">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>下次节点说明</label>
+      <input id="f-next-label" placeholder="如：技术一面、笔试截止">
+    </div>
+
+    <hr class="divider">
+
+    <div class="form-row">
+      <label>HR 联系方式</label>
+      <input id="f-hr" placeholder="微信号 / 邮箱">
+    </div>
+    <div class="form-row">
+      <label>备注</label>
+      <textarea id="f-note" placeholder="面试感受、薪资范围、注意事项…"></textarea>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-save" onclick="save()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let records=JSON.parse(localStorage.getItem('job_tracker')||'[]');
+let editId=null;
+
+function persist(){try{localStorage.setItem('job_tracker',JSON.stringify(records))}catch(e){}}
+function fmt(d){if(!d)return'—';const p=d.split('-');return p[1]+'/'+p[2]}
+
+function renderStats(){
+  const total=records.length;
+  const active=records.filter(r=>!['已挂','已放弃','已拿offer'].includes(r.status)).length;
+  const offers=records.filter(r=>r.status==='已拿offer').length;
+  const today=new Date().toISOString().slice(0,10);
+  const upcoming=records.filter(r=>r.nextDate&&r.nextDate>=today&&!['已挂','已放弃','已拿offer'].includes(r.status)).length;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat">
+      <div class="stat-top"><span class="stat-label">总投递</span><div class="stat-icon blue"><i class="ti ti-send" aria-hidden="true"></i></div></div>
+      <div class="stat-num">${total}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-top"><span class="stat-label">进行中</span><div class="stat-icon amber"><i class="ti ti-loader" aria-hidden="true"></i></div></div>
+      <div class="stat-num">${active}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-top"><span class="stat-label">待处理节点</span><div class="stat-icon teal"><i class="ti ti-calendar-event" aria-hidden="true"></i></div></div>
+      <div class="stat-num">${upcoming}</div>
+    </div>
+    <div class="stat">
+      <div class="stat-top"><span class="stat-label">已拿 offer</span><div class="stat-icon green"><i class="ti ti-circle-check" aria-hidden="true"></i></div></div>
+      <div class="stat-num">${offers}</div>
+    </div>`;
+}
+
+function render(){
+  const fv=document.getElementById('filterStatus').value;
+  const rows=fv?records.filter(r=>r.status===fv):records;
+  const tbody=document.getElementById('tbody');
+  const empty=document.getElementById('empty');
+  renderStats();
+  if(!rows.length){tbody.innerHTML='';empty.style.display='block';return}
+  empty.style.display='none';
+  tbody.innerHTML=rows.map(r=>`
+    <tr>
+      <td class="company-cell" title="${r.company}">${r.company}</td>
+      <td title="${r.role}">${r.role}</td>
+      <td><span class="type-tag">${r.type||'—'}</span></td>
+      <td class="muted">${fmt(r.date)}</td>
+      <td class="next-cell">${r.nextDate?`<div class="next-date">${fmt(r.nextDate)}</div><div class="next-lbl">${r.nextLabel||''}</div>`:'—'}</td>
+      <td><span class="badge b-${r.status}">${r.status}</span></td>
+      <td class="notes-cell" title="${r.note||''}">${r.note||'—'}</td>
+      <td style="text-align:center;white-space:nowrap">
+        <button class="act-btn" onclick="openEdit('${r.id}')" title="编辑" aria-label="编辑"><i class="ti ti-edit" aria-hidden="true"></i></button>
+        <button class="act-btn del" onclick="del('${r.id}')" title="删除" aria-label="删除"><i class="ti ti-trash" aria-hidden="true"></i></button>
+      </td>
+    </tr>`).join('');
+}
+
+function openAdd(){
+  editId=null;
+  document.getElementById('modal-title').textContent='新增投递';
+  ['company','role','next-label','hr','note'].forEach(k=>document.getElementById('f-'+k).value='');
+  document.getElementById('f-type').value='实习';
+  document.getElementById('f-status').value='投递中';
+  document.getElementById('f-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('f-next').value='';
+  document.getElementById('modal').style.display='flex';
+}
+
+function openEdit(id){
+  const r=records.find(x=>x.id===id);if(!r)return;
+  editId=id;
+  document.getElementById('modal-title').textContent='编辑记录';
+  document.getElementById('f-company').value=r.company;
+  document.getElementById('f-role').value=r.role;
+  document.getElementById('f-type').value=r.type||'实习';
+  document.getElementById('f-status').value=r.status;
+  document.getElementById('f-date').value=r.date||'';
+  document.getElementById('f-next').value=r.nextDate||'';
+  document.getElementById('f-next-label').value=r.nextLabel||'';
+  document.getElementById('f-hr').value=r.hr||'';
+  document.getElementById('f-note').value=r.note||'';
+  document.getElementById('modal').style.display='flex';
+}
+
+function closeModal(){document.getElementById('modal').style.display='none'}
+
+function save(){
+  const company=document.getElementById('f-company').value.trim();
+  const role=document.getElementById('f-role').value.trim();
+  if(!company||!role){alert('公司名称和岗位为必填项');return}
+  const rec={
+    id:editId||Date.now().toString(),
+    company,role,
+    type:document.getElementById('f-type').value,
+    status:document.getElementById('f-status').value,
+    date:document.getElementById('f-date').value,
+    nextDate:document.getElementById('f-next').value,
+    nextLabel:document.getElementById('f-next-label').value.trim(),
+    hr:document.getElementById('f-hr').value.trim(),
+    note:document.getElementById('f-note').value.trim(),
+  };
+  if(editId){const i=records.findIndex(x=>x.id===editId);records[i]=rec}
+  else{records.unshift(rec)}
+  persist();closeModal();render();
+}
+
+function del(id){
+  if(!confirm('确认删除这条记录？'))return;
+  records=records.filter(x=>x.id!==id);persist();render();
+}
+
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal()});
+render();
+</script>
