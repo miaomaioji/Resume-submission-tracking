@@ -1,1 +1,2 @@
 一个用cluade生成的个人自用html表格
+使用方法：下载job_tracker_v2.html打开
