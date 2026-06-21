@@ -1,4 +1,4 @@
-import { Fragment, type ChangeEvent, useMemo, useRef, useState } from 'react'
+import { Fragment, type ChangeEvent, useEffect, useMemo, useRef, useState } from 'react'
 import {
   createColumnHelper,
   flexRender,
@@ -35,6 +35,7 @@ import { formatSalary } from '@/lib/format'
 import { TIMEOUT_COLORS, timeoutLevel } from '@/domain/timeout'
 import { STATUS_LABEL_ZH, STATUS_ORDER, type Status } from '@/domain/enums'
 import type { Application } from '@/domain/types'
+import { useUiStore } from '@/app/uiStore'
 
 const columnHelper = createColumnHelper<Application>()
 
@@ -57,6 +58,15 @@ export function TablePage() {
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const fileRef = useRef<HTMLInputElement>(null)
+  const focusAppId = useUiStore((s) => s.focusAppId)
+  const setFocusAppId = useUiStore((s) => s.setFocusAppId)
+
+  // 从日历/看板跳转过来时,自动展开对应记录
+  useEffect(() => {
+    if (!focusAppId) return
+    setExpanded((prev) => new Set(prev).add(focusAppId))
+    setFocusAppId(null)
+  }, [focusAppId, setFocusAppId])
 
   const data = useMemo(
     () =>
