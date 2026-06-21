@@ -24,13 +24,13 @@
 
 ## 2. 功能截图
 
-> 📷 以下为占位图。把真实截图放进 `docs/screenshots/` 后,替换为 `![](docs/screenshots/xxx.png)` 即可。
+> 📷 以下为项目实际截图，图片位于 `docs/screenshots/`。
 
 | 表格视图(内联编辑) | 看板(拖拽改状态) |
 | :---: | :---: |
-| ![table](https://placehold.co/600x360?text=Table+View) | ![kanban](https://placehold.co/600x360?text=Kanban) |
+| ![表格视图](docs/screenshots/table.png) | ![看板视图](docs/screenshots/kanban.png) |
 | **日历 + 防撞车** | **深色模式** |
-| ![calendar](https://placehold.co/600x360?text=Calendar) | ![dark](https://placehold.co/600x360/1e293b/f1f5f9?text=Dark+Mode) |
+| ![日历视图](docs/screenshots/calendar.png) | ![深色模式](docs/screenshots/dark.png) |
 
 ---
 
