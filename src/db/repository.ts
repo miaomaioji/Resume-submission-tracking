@@ -1,0 +1,125 @@
+import { db } from './schema'
+import { DEFAULT_CHANNELS, DEFAULT_TIMEOUT, type Status } from '@/domain/enums'
+import { nowIso, uid } from '@/domain/id'
+import type { Application, Channel, Settings, TimelineEvent } from '@/domain/types'
+
+/**
+ * 数据访问抽象。MVP 用本地(Dexie)实现;未来自建后端时新增远端实现,UI/领域层不变。
+ */
+export interface Repository {
+  listApplications(): Promise<Application[]>
+  getApplication(id: string): Promise<Application | undefined>
+  createApplication(
+    input: Partial<Application> & { company: string; position: string },
+  ): Promise<Application>
+  updateApplication(id: string, patch: Partial<Application>): Promise<void>
+  changeStatus(id: string, to: Status, label?: string): Promise<void>
+  softDeleteApplication(id: string): Promise<void>
+  listEvents(applicationId: string): Promise<TimelineEvent[]>
+  getSettings(): Promise<Settings>
+  saveSettings(patch: Partial<Settings>): Promise<void>
+  listChannels(): Promise<Channel[]>
+}
+
+export const SETTINGS_DEFAULT: Settings = {
+  id: 'singleton',
+  language: 'zh-CN',
+  theme: 'system',
+  timeout: { default: { ...DEFAULT_TIMEOUT }, byChannel: {} },
+  reminders: { interviewDayBefore: true, interviewHoursBefore: 2, followUpDue: true, idleTimeout: true },
+  table: { columnOrder: [], hiddenColumns: [], columnWidths: {} },
+}
+
+class LocalRepository implements Repository {
+  listApplications() {
+    return db.applications.filter((a) => !a.deletedAt).toArray()
+  }
+
+  getApplication(id: string) {
+    return db.applications.get(id)
+  }
+
+  async createApplication(
+    input: Partial<Application> & { company: string; position: string },
+  ): Promise<Application> {
+    const ts = nowIso()
+    const app: Application = {
+      ...input,
+      id: uid(),
+      company: input.company,
+      position: input.position,
+      status: input.status ?? 'created',
+      tagIds: input.tagIds ?? [],
+      createdAt: ts,
+      updatedAt: ts,
+      version: 1,
+      deletedAt: null,
+    }
+    await db.applications.add(app)
+    return app
+  }
+
+  async updateApplication(id: string, patch: Partial<Application>) {
+    const cur = await db.applications.get(id)
+    if (!cur) return
+    await db.applications.update(id, { ...patch, updatedAt: nowIso(), version: cur.version + 1 })
+  }
+
+  async changeStatus(id: string, to: Status, label?: string) {
+    const cur = await db.applications.get(id)
+    if (!cur || cur.status === to) return
+    const ts = nowIso()
+    const event: TimelineEvent = {
+      id: uid(),
+      applicationId: id,
+      type: 'status_change',
+      at: ts,
+      fromStatus: cur.status,
+      toStatus: to,
+      label,
+      createdAt: ts,
+    }
+    await db.transaction('rw', db.applications, db.events, async () => {
+      await db.applications.update(id, { status: to, updatedAt: ts, version: cur.version + 1 })
+      await db.events.add(event)
+    })
+  }
+
+  async softDeleteApplication(id: string) {
+    await db.applications.update(id, { deletedAt: nowIso() })
+  }
+
+  listEvents(applicationId: string) {
+    return db.events.where('applicationId').equals(applicationId).sortBy('at')
+  }
+
+  async getSettings() {
+    const s = await db.settings.get('singleton')
+    return s ?? SETTINGS_DEFAULT
+  }
+
+  async saveSettings(patch: Partial<Settings>) {
+    const cur = await this.getSettings()
+    await db.settings.put({ ...cur, ...patch, id: 'singleton' })
+  }
+
+  listChannels() {
+    return db.channels.orderBy('order').toArray()
+  }
+}
+
+export const repo: Repository = new LocalRepository()
+
+/** 首次启动播种默认渠道与设置(幂等)。 */
+export async function initDb(): Promise<void> {
+  try {
+    if ((await db.channels.count()) === 0) {
+      await db.channels.bulkAdd(DEFAULT_CHANNELS.map((name, order) => ({ id: uid(), name, order })))
+    }
+    if (!(await db.settings.get('singleton'))) {
+      await db.settings.put(SETTINGS_DEFAULT)
+    }
+  } catch (err) {
+    console.error('[initDb] 初始化失败', err)
+  }
+}
