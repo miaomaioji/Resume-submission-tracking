@@ -60,6 +60,7 @@ export function TablePage() {
   const fileRef = useRef<HTMLInputElement>(null)
   const focusAppId = useUiStore((s) => s.focusAppId)
   const setFocusAppId = useUiStore((s) => s.setFocusAppId)
+  const addNonce = useUiStore((s) => s.addNonce)
 
   // 从日历/看板跳转过来时,自动展开对应记录
   useEffect(() => {
@@ -67,6 +68,15 @@ export function TablePage() {
     setExpanded((prev) => new Set(prev).add(focusAppId))
     setFocusAppId(null)
   }, [focusAppId, setFocusAppId])
+
+  // 外壳 FAB 触发「新增投递」
+  useEffect(() => {
+    if (addNonce > 0) {
+      setEditingApp(undefined)
+      setInitial(undefined)
+      setFormOpen(true)
+    }
+  }, [addNonce])
 
   const data = useMemo(
     () =>

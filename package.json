@@ -20,11 +20,21 @@
     "appId": "net.aessence.resumetracker",
     "productName": "ResumeTracker",
     "asar": false,
-    "files": ["dist/**", "electron/**"],
-    "directories": { "output": "release" },
+    "files": [
+      "dist/**",
+      "electron/**"
+    ],
+    "directories": {
+      "output": "release"
+    },
     "artifactName": "resume-tracker-${version}-${os}-${arch}.${ext}",
-    "mac": { "target": "dmg", "category": "public.app-category.productivity" },
-    "win": { "target": "nsis" }
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity"
+    },
+    "win": {
+      "target": "nsis"
+    }
   },
   "dependencies": {
     "@capacitor/android": "^6.2.1",
@@ -32,6 +42,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@material/material-color-utilities": "^0.4.0",
     "@tabler/icons-react": "^3.44.0",
     "@tanstack/react-table": "^8.21.3",
     "@tanstack/react-virtual": "^3.14.3",
