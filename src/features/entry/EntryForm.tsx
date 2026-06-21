@@ -1,7 +1,8 @@
-import { type ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import dayjs from 'dayjs'
 import { Modal } from '@/components/Modal'
+import { Button } from '@/components/m3/Button'
+import { Select, TextArea, TextField } from '@/components/m3/Field'
 import { repo } from '@/db/repository'
 import { useChannels } from '@/hooks/useData'
 import { JOB_TYPES, STATUS_LABEL_ZH, STATUS_ORDER, type JobType, type Status } from '@/domain/enums'
@@ -56,25 +57,6 @@ function toForm(app?: Application, initial?: Partial<Application>): FormValues {
     sourceUrl: s.sourceUrl ?? '',
     notes: s.notes ?? '',
   }
-}
-
-const FIELD = 'w-full rounded-md border px-2 py-1.5 text-sm'
-const fieldStyle = { borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--text)' }
-
-function L({ label, children, error }: { label: string; children: ReactNode; error?: string }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-medium" style={{ color: 'var(--text-muted)' }}>
-        {label}
-      </span>
-      {children}
-      {error && (
-        <span className="mt-1 block text-xs" style={{ color: 'var(--alert)' }}>
-          {error}
-        </span>
-      )}
-    </label>
-  )
 }
 
 export function EntryForm({
@@ -133,142 +115,87 @@ export function EntryForm({
       onClose={onClose}
       footer={
         <>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md border px-4 py-1.5 text-sm"
-            style={{ borderColor: 'var(--border)' }}
-          >
+          <Button type="button" variant="text" onClick={onClose}>
             取消
-          </button>
-          <button
-            type="submit"
-            form="entry-form"
-            disabled={isSubmitting}
-            className="rounded-md px-4 py-1.5 text-sm font-medium text-white disabled:opacity-60"
-            style={{ background: 'var(--primary)' }}
-          >
+          </Button>
+          <Button type="submit" form="entry-form" variant="filled" disabled={isSubmitting}>
             保存
-          </button>
+          </Button>
         </>
       }
     >
       <form id="entry-form" onSubmit={handleSubmit(onSubmit)} className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
-          <L label="公司名称 *" error={errors.company?.message}>
-            <input
-              className={FIELD}
-              style={fieldStyle}
-              placeholder="如:乐鑫科技"
-              {...register('company', { required: '必填' })}
-            />
-          </L>
-          <L label="岗位 *" error={errors.position?.message}>
-            <input
-              className={FIELD}
-              style={fieldStyle}
-              placeholder="如:PCB 设计工程师"
-              {...register('position', { required: '必填' })}
-            />
-          </L>
+          <TextField
+            label="公司名称 *"
+            placeholder="如:乐鑫科技"
+            error={errors.company?.message}
+            {...register('company', { required: '必填' })}
+          />
+          <TextField
+            label="岗位 *"
+            placeholder="如:PCB 设计工程师"
+            error={errors.position?.message}
+            {...register('position', { required: '必填' })}
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <L label="类型">
-            <select className={FIELD} style={fieldStyle} {...register('jobType')}>
-              <option value="">—</option>
-              {JOB_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </L>
-          <L label="渠道">
-            <select className={FIELD} style={fieldStyle} {...register('channel')}>
-              <option value="">—</option>
-              {channels.map((c) => (
-                <option key={c.id} value={c.name}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </L>
+          <Select label="类型" {...register('jobType')}>
+            <option value="">—</option>
+            {JOB_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </Select>
+          <Select label="渠道" {...register('channel')}>
+            <option value="">—</option>
+            {channels.map((c) => (
+              <option key={c.id} value={c.name}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <L label="状态">
-            <select className={FIELD} style={fieldStyle} {...register('status')}>
-              {STATUS_ORDER.map((s) => (
-                <option key={s} value={s}>
-                  {STATUS_LABEL_ZH[s]}
-                </option>
-              ))}
-            </select>
-          </L>
-          <L label="工作地点">
-            <input className={FIELD} style={fieldStyle} placeholder="如:上海" {...register('location')} />
-          </L>
+          <Select label="状态" {...register('status')}>
+            {STATUS_ORDER.map((s) => (
+              <option key={s} value={s}>
+                {STATUS_LABEL_ZH[s]}
+              </option>
+            ))}
+          </Select>
+          <TextField label="工作地点" placeholder="如:上海" {...register('location')} />
         </div>
 
         <div className="grid grid-cols-4 gap-3">
-          <L label="薪资下限">
-            <input className={FIELD} style={fieldStyle} type="number" placeholder="15000" {...register('salaryMin')} />
-          </L>
-          <L label="薪资上限">
-            <input className={FIELD} style={fieldStyle} type="number" placeholder="25000" {...register('salaryMax')} />
-          </L>
-          <L label="几薪">
-            <input className={FIELD} style={fieldStyle} type="number" placeholder="14" {...register('salaryMonths')} />
-          </L>
-          <L label="周期">
-            <select className={FIELD} style={fieldStyle} {...register('salaryPeriod')}>
-              <option value="monthly">月</option>
-              <option value="yearly">年</option>
-            </select>
-          </L>
+          <TextField label="薪资下限" type="number" placeholder="15000" {...register('salaryMin')} />
+          <TextField label="薪资上限" type="number" placeholder="25000" {...register('salaryMax')} />
+          <TextField label="几薪" type="number" placeholder="14" {...register('salaryMonths')} />
+          <Select label="周期" {...register('salaryPeriod')}>
+            <option value="monthly">月</option>
+            <option value="yearly">年</option>
+          </Select>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <L label="投递日期">
-            <input className={FIELD} style={fieldStyle} type="date" {...register('appliedAt')} />
-          </L>
-          <L label="最近沟通">
-            <input className={FIELD} style={fieldStyle} type="date" {...register('lastContactAt')} />
-          </L>
+          <TextField label="投递日期" type="date" {...register('appliedAt')} />
+          <TextField label="最近沟通" type="date" {...register('lastContactAt')} />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <L label="下次跟进日期">
-            <input className={FIELD} style={fieldStyle} type="date" {...register('nextFollowUpAt')} />
-          </L>
-          <L label="下次节点说明">
-            <input
-              className={FIELD}
-              style={fieldStyle}
-              placeholder="如:技术一面、笔试截止"
-              {...register('nextActionLabel')}
-            />
-          </L>
+          <TextField label="下次跟进日期" type="date" {...register('nextFollowUpAt')} />
+          <TextField label="下次节点说明" placeholder="如:技术一面、笔试截止" {...register('nextActionLabel')} />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <L label="面试时间">
-            <input className={FIELD} style={fieldStyle} type="datetime-local" {...register('interviewAt')} />
-          </L>
-          <L label="招聘链接">
-            <input className={FIELD} style={fieldStyle} type="url" placeholder="https://…" {...register('sourceUrl')} />
-          </L>
+          <TextField label="面试时间" type="datetime-local" {...register('interviewAt')} />
+          <TextField label="招聘链接" type="url" placeholder="https://…" {...register('sourceUrl')} />
         </div>
 
-        <L label="备注">
-          <textarea
-            className={FIELD}
-            style={{ ...fieldStyle, minHeight: 64, resize: 'vertical' }}
-            placeholder="面试感受、薪资细节、注意事项…"
-            {...register('notes')}
-          />
-        </L>
+        <TextArea label="备注" placeholder="面试感受、薪资细节、注意事项…" {...register('notes')} />
       </form>
     </Modal>
   )

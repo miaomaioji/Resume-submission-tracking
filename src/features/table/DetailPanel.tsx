@@ -6,6 +6,8 @@ import { formatDateTime } from '@/lib/format'
 import { STATUS_LABEL_ZH, type Status } from '@/domain/enums'
 import type { Application } from '@/domain/types'
 import { TagChips, pickTagColor } from '@/components/TagChips'
+import { Button } from '@/components/m3/Button'
+import { IconButton } from '@/components/m3/IconButton'
 
 const inputCls = 'rounded border px-2 py-1 text-sm'
 const inputStyle = { borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--text)' }
@@ -91,14 +93,9 @@ export function DetailPanel({ app }: { app: Application }) {
               if (e.key === 'Enter') addNote()
             }}
           />
-          <button
-            type="button"
-            onClick={addNote}
-            className="rounded border px-3 text-sm"
-            style={{ borderColor: 'var(--border)' }}
-          >
+          <Button variant="tonal" onClick={addNote} className="h-9 shrink-0 px-4">
             添加
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -134,14 +131,9 @@ export function DetailPanel({ app }: { app: Application }) {
               <option key={t.id} value={t.name} />
             ))}
           </datalist>
-          <button
-            type="button"
-            onClick={addTag}
-            className="rounded border px-3 text-sm"
-            style={{ borderColor: 'var(--border)' }}
-          >
+          <Button variant="tonal" onClick={addTag} className="h-9 shrink-0 px-4">
             添加
-          </button>
+          </Button>
         </div>
 
         <h4
@@ -158,15 +150,13 @@ export function DetailPanel({ app }: { app: Application }) {
               <span style={{ color: 'var(--text-muted)' }}>
                 {[ct.wechat, ct.phone, ct.email].filter(Boolean).join(' · ')}
               </span>
-              <button
-                type="button"
+              <IconButton
                 onClick={() => repo.deleteContact(ct.id)}
-                className="ml-auto"
-                style={{ color: 'var(--text-muted)' }}
                 aria-label="删除联系人"
+                className="ml-auto h-7 w-7"
               >
                 <IconTrash size={14} />
-              </button>
+              </IconButton>
             </li>
           ))}
           {contacts.length === 0 && (
@@ -182,14 +172,9 @@ export function DetailPanel({ app }: { app: Application }) {
           <input className={inputCls} style={inputStyle} placeholder="电话" value={c.phone} onChange={(e) => setC({ ...c, phone: e.target.value })} />
           <input className={`${inputCls} col-span-2`} style={inputStyle} placeholder="邮箱" value={c.email} onChange={(e) => setC({ ...c, email: e.target.value })} />
         </div>
-        <button
-          type="button"
-          onClick={addContact}
-          className="mt-2 rounded border px-3 py-1 text-sm"
-          style={{ borderColor: 'var(--border)' }}
-        >
+        <Button variant="outlined" onClick={addContact} className="mt-2 h-9 px-4">
           添加联系人
-        </button>
+        </Button>
       </div>
     </div>
   )

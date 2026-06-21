@@ -36,7 +36,7 @@ export function StatsCards({ apps }: { apps: Application[] }) {
         return (
           <div
             key={label}
-            className="flex flex-col gap-1.5 rounded-lg p-4"
+            className="flex flex-col gap-1.5 rounded-2xl p-4"
             style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
           >
             <div className="flex items-center justify-between">

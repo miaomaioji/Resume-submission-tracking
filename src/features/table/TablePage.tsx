@@ -28,6 +28,8 @@ import { downloadBackup, exportBackup, importBackup } from '@/lib/backup'
 import { StatsCards } from './StatsCards'
 import { EntryForm } from '@/features/entry/EntryForm'
 import { EditableCell } from './EditableCell'
+import { Button } from '@/components/m3/Button'
+import { IconButton } from '@/components/m3/IconButton'
 import { DetailPanel } from './DetailPanel'
 import { TagChips } from '@/components/TagChips'
 import { EDITABLE_IDS, GridContext, type EditPos, type GridApi } from './grid'
@@ -197,15 +199,17 @@ export function TablePage() {
         id: 'expander',
         header: '',
         cell: ({ row }) => (
-          <button
-            type="button"
+          <IconButton
             onClick={() => toggleExpand(row.original.id)}
-            className="rounded p-1"
-            style={{ color: 'var(--text-muted)' }}
             aria-label="展开详情"
+            className="h-8 w-8"
           >
-            {expanded.has(row.original.id) ? <IconChevronDown size={16} /> : <IconChevronRight size={16} />}
-          </button>
+            {expanded.has(row.original.id) ? (
+              <IconChevronDown size={16} />
+            ) : (
+              <IconChevronRight size={16} />
+            )}
+          </IconButton>
         ),
       }),
       columnHelper.accessor('company', {
@@ -254,25 +258,13 @@ export function TablePage() {
         id: 'actions',
         header: '',
         cell: ({ row }) => (
-          <div className="flex justify-end gap-1">
-            <button
-              type="button"
-              onClick={() => onEditRow(row.original)}
-              className="rounded p-1"
-              style={{ color: 'var(--text-muted)' }}
-              aria-label="编辑详情"
-            >
+          <div className="flex justify-end">
+            <IconButton onClick={() => onEditRow(row.original)} aria-label="编辑详情" className="h-8 w-8">
               <IconEdit size={16} />
-            </button>
-            <button
-              type="button"
-              onClick={() => onDelete(row.original)}
-              className="rounded p-1"
-              style={{ color: 'var(--text-muted)' }}
-              aria-label="删除"
-            >
+            </IconButton>
+            <IconButton onClick={() => onDelete(row.original)} aria-label="删除" className="h-8 w-8">
               <IconTrash size={16} />
-            </button>
+            </IconButton>
           </div>
         ),
       }),
@@ -354,16 +346,19 @@ export function TablePage() {
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative">
           <IconSearch
-            size={15}
-            className="absolute left-2 top-1/2 -translate-y-1/2"
-            style={{ color: 'var(--text-muted)' }}
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2"
+            style={{ color: 'var(--md-sys-color-on-surface-variant)' }}
           />
           <input
             value={globalFilter}
             onChange={(e) => setGlobalFilter(e.target.value)}
             placeholder="搜索公司 / 岗位 / 备注…"
-            className="rounded-md border py-1.5 pl-7 pr-3 text-sm"
-            style={{ borderColor: 'var(--border)', background: 'var(--surface)' }}
+            className="h-10 rounded-full border-0 pl-9 pr-4 text-sm outline-none"
+            style={{
+              background: 'var(--md-sys-color-surface-variant)',
+              color: 'var(--md-sys-color-on-surface)',
+            }}
           />
         </div>
         <select
@@ -395,24 +390,16 @@ export function TablePage() {
           </select>
         )}
         <div className="ml-auto flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={onExport}
-            className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm"
-            style={{ borderColor: 'var(--border)' }}
-          >
-            <IconDownload size={15} />
+          <Button variant="outlined" onClick={onExport} icon={<IconDownload size={16} />}>
             导出备份
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="outlined"
             onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm"
-            style={{ borderColor: 'var(--border)' }}
+            icon={<IconUpload size={16} />}
           >
-            <IconUpload size={15} />
             导入备份
-          </button>
+          </Button>
           <input
             ref={fileRef}
             type="file"
@@ -420,32 +407,15 @@ export function TablePage() {
             className="hidden"
             onChange={onImportFile}
           />
-          <button
-            type="button"
-            onClick={onImportLegacy}
-            className="rounded-md border px-3 py-1.5 text-sm"
-            style={{ borderColor: 'var(--border)' }}
-          >
+          <Button variant="text" onClick={onImportLegacy}>
             导入旧版
-          </button>
-          <button
-            type="button"
-            onClick={onCopyLast}
-            className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm"
-            style={{ borderColor: 'var(--border)' }}
-          >
-            <IconCopy size={15} />
+          </Button>
+          <Button variant="tonal" onClick={onCopyLast} icon={<IconCopy size={16} />}>
             复制上一条
-          </button>
-          <button
-            type="button"
-            onClick={onAdd}
-            className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-white"
-            style={{ background: 'var(--primary)' }}
-          >
-            <IconPlus size={15} />
+          </Button>
+          <Button variant="filled" onClick={onAdd} icon={<IconPlus size={16} />}>
             新增投递
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -483,22 +453,17 @@ export function TablePage() {
               ))}
             </select>
           )}
-          <button
-            type="button"
+          <Button
+            variant="outlined"
             onClick={onBulkDelete}
-            className="rounded-md border px-3 py-1 text-sm"
-            style={{ borderColor: 'var(--alert)', color: 'var(--alert)' }}
+            className="h-9 px-4"
+            style={{ borderColor: 'var(--md-sys-color-error)', color: 'var(--md-sys-color-error)' }}
           >
             批量删除
-          </button>
-          <button
-            type="button"
-            onClick={() => setRowSelection({})}
-            className="ml-auto text-sm"
-            style={{ color: 'var(--text-muted)' }}
-          >
+          </Button>
+          <Button variant="text" onClick={() => setRowSelection({})} className="ml-auto h-9 px-3">
             取消选择
-          </button>
+          </Button>
         </div>
       )}
 

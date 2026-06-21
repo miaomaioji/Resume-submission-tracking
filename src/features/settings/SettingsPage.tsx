@@ -3,6 +3,8 @@ import { IconPlus, IconTrash } from '@tabler/icons-react'
 import { useChannels, useSettings } from '@/hooks/useData'
 import { repo } from '@/db/repository'
 import type { TimeoutRule } from '@/domain/types'
+import { Button } from '@/components/m3/Button'
+import { IconButton } from '@/components/m3/IconButton'
 
 const numCls = 'w-16 rounded border px-2 py-1 text-sm'
 const numStyle = { borderColor: 'var(--border)', background: 'var(--surface)', color: 'var(--text)' }
@@ -59,7 +61,7 @@ export function SettingsPage() {
           投递后(以最近沟通时间为准)无响应超过对应天数,主表格行左侧按颜色提示。
         </p>
         <div
-          className="mt-3 flex flex-wrap items-center gap-4 rounded-lg border p-4"
+          className="mt-3 flex flex-wrap items-center gap-4 rounded-2xl border p-4"
           style={{ borderColor: 'var(--border)' }}
         >
           <span className="text-sm font-medium">全局默认</span>
@@ -92,7 +94,7 @@ export function SettingsPage() {
             return (
               <div
                 key={c.id}
-                className="flex flex-wrap items-center gap-3 rounded-lg border p-3"
+                className="flex flex-wrap items-center gap-3 rounded-2xl border p-3"
                 style={{ borderColor: 'var(--border)' }}
               >
                 <span className="w-24 text-sm font-medium">{c.name}</span>
@@ -121,15 +123,13 @@ export function SettingsPage() {
                       天
                     </label>
                   ))}
-                <button
-                  type="button"
+                <IconButton
                   onClick={() => deleteChannel(c.id, c.name)}
-                  className="ml-auto rounded p-1"
-                  style={{ color: 'var(--text-muted)' }}
                   aria-label="删除渠道"
+                  className="ml-auto h-8 w-8"
                 >
                   <IconTrash size={16} />
-                </button>
+                </IconButton>
               </div>
             )
           })}
@@ -150,15 +150,9 @@ export function SettingsPage() {
             }}
             placeholder="新渠道名称"
           />
-          <button
-            type="button"
-            onClick={addChannel}
-            className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm font-medium text-white"
-            style={{ background: 'var(--primary)' }}
-          >
-            <IconPlus size={15} />
+          <Button variant="filled" onClick={addChannel} icon={<IconPlus size={16} />}>
             添加渠道
-          </button>
+          </Button>
         </div>
       </section>
     </div>

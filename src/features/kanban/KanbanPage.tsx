@@ -22,7 +22,7 @@ function Card({ app, settings }: { app: Application; settings: Settings }) {
       ref={setNodeRef}
       {...listeners}
       {...attributes}
-      className="cursor-grab rounded-md p-2 text-sm active:cursor-grabbing"
+      className="cursor-grab rounded-xl p-2.5 text-sm active:cursor-grabbing"
       style={{
         background: 'var(--surface)',
         border: '1px solid var(--border)',
@@ -49,7 +49,7 @@ function Column({ status, apps, settings }: { status: Status; apps: Application[
   return (
     <div
       ref={setNodeRef}
-      className="flex w-56 flex-shrink-0 flex-col rounded-lg p-2"
+      className="flex w-56 flex-shrink-0 flex-col rounded-2xl p-2"
       style={{
         background: isOver ? c.bg : 'var(--bg)',
         border: `1px solid ${isOver ? c.fg : 'var(--border)'}`,
