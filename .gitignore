@@ -37,3 +37,7 @@ coverage
 
 # PWA generated
 dev-dist
+
+# Capacitor native projects (generated in CI for APK build)
+/android
+/ios
